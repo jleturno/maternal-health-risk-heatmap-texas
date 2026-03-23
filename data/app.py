@@ -16,12 +16,10 @@ st.markdown(
     """
     <style>
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1.05rem;
+        padding-bottom: 1.2rem;
+        max-width: 1600px;
     }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 
 # =========================================================
