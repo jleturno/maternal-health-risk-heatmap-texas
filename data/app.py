@@ -16,37 +16,7 @@ st.markdown(
     """
     <style>
     .block-container {
-        padding-top: 1.05rem;
-        padding-bottom: 1.2rem;
-        max-width: 1600px;
-    }
-
-
-# =========================================================
-# PAGE CONFIG
-# =========================================================
-st.set_page_config(
-    page_title="Texas Maternal Health Risk Prioritization Dashboard",
-    layout="wide",
-)
-
-
-# =========================================================
-# FILE PATHS
-# =========================================================
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_CSV = BASE_DIR / "notebooks" / "tx_dashboard_data.csv"
-GEOJSON_FILE = BASE_DIR / "notebooks" / "tx_counties.geojson"
-
-
-# =========================================================
-# STYLING
-# =========================================================
-st.markdown(
-    """
-    <style>
-    .block-container {
-        padding-top: 1.05rem;
+        padding-top: 4.25rem;
         padding-bottom: 1.2rem;
         max-width: 1600px;
     }
@@ -59,6 +29,7 @@ st.markdown(
         font-size: 2.3rem;
         font-weight: 800;
         line-height: 1.02;
+        margin-top: 0.4rem;
         margin-bottom: 0.35rem;
     }
 
@@ -170,7 +141,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
 
 # =========================================================
 # CONSTANTS
