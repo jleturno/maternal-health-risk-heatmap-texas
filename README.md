@@ -2,8 +2,7 @@
 
 ## Live App
 
-[View the interactive dashboard]([https://maternal-health-risk-heatmap-texas-sag9z8vmjjju5cktgl6eew.streamlit.app](https://maternal-health-risk-heatmap-texas-sag9z8vmjjiu5cktgl6eew.streamlit.app/))
-
+[View the interactive dashboard](https://maternal-health-risk-heatmap-texas-sag9z8vmjjiu5cktgl6eew.streamlit.app/)
 ---
 
 ## Overview
