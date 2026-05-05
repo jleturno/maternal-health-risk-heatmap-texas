@@ -1,37 +1,92 @@
 # Texas Maternal Health Risk Prioritization Dashboard
 
-A county-level maternal health analytics dashboard for Texas, designed to support risk screening, county comparison, and public health communication.
+A county-level maternal health analytics application designed to support evidence-based decision-making, risk identification, and equitable resource allocation across Texas.
+
+---
 
 ## Overview
 
-This project visualizes county-level maternal health risk across Texas using a composite percentile-based risk score and related indicators. It is designed as a decision-support tool for identifying elevated burden, comparing counties to statewide benchmarks, and highlighting potential driver metrics for deeper review.
+Maternal health outcomes in the United States—and particularly in Texas—vary significantly across geography, access to care, and socioeconomic conditions. These disparities are often difficult to interpret quickly using raw data alone.
 
-## Features
+This project translates complex maternal health indicators into a structured, interpretable framework that highlights where risk is most concentrated and which factors may be contributing to that burden.
 
-- Interactive Texas county risk map
-- County-level profile panel
-- Composite maternal risk percentile
-- Statewide rank and Texas average comparison
-- Top driver comparison table
-- Similar county comparison
-- Rankings for highest- and lowest-burden counties
-- Downloadable county summary exports
-- Methodology notes
+The dashboard enables users to:
+- Identify counties with elevated relative maternal health risk
+- Compare counties against statewide benchmarks
+- Surface key drivers of disparities across regions
+- Support more targeted and informed public health responses
 
-## Tech stack
+This tool is intended as a **prioritization and communication aid**, not a causal model.
 
-- Python
-- Streamlit
-- Pandas
-- NumPy
-- Plotly
+---
 
-## How to run
+## Why This Matters
 
+Maternal health disparities are not randomly distributed. They reflect underlying differences in access to care, economic stability, chronic disease burden, and systemic inequities.
+
+Without clear, accessible tools for interpreting these patterns:
+- High-risk areas may go under-identified
+- Resources may not be allocated effectively
+- Critical intervention opportunities may be missed
+
+This dashboard is designed to make those patterns more visible, interpretable, and actionable.
+
+---
+
+## Key Features
+
+- Interactive choropleth map of Texas counties
+- Composite maternal health risk score (percentile-based)
+- County-level risk profile with statewide ranking and context
+- Driver analysis comparing county values to Texas averages
+- Component comparison visualization across key metrics
+- Similarity analysis to identify comparable county profiles
+- Ranking tables for highest- and lowest-burden counties
+- Automated narrative summaries for communication and reporting
+- Methodology and interpretation guidance
+
+---
+
+## Methodology
+
+- All indicators are standardized into percentile-based values
+- Higher percentiles represent relatively higher burden or risk
+- A composite risk score aggregates multiple maternal health-related factors
+- Rankings are calculated across all Texas counties
+
+### Interpretation Notes
+
+- This is a relative comparison framework, not an absolute risk model
+- Results should not be interpreted as causal
+- County-level data may mask within-county disparities
+- Findings should be used alongside domain expertise and local context
+
+---
+
+## Use Cases
+
+This tool is designed to support:
+
+- Public health agencies identifying high-priority regions
+- Policy analysts evaluating geographic disparities
+- Health equity organizations targeting interventions
+- Hospital systems and planners assessing regional need
+- Nonprofits communicating risk patterns to stakeholders
+
+---
+
+## Tech Stack
+
+- Python  
+- Streamlit  
+- Pandas  
+- NumPy  
+- Plotly  
+
+---
+
+## How to Run
+
+```bash
 pip install -r requirements.txt
-
-streamlit run data/app.py
-
-## Author
-
-Jillian Leturno
+streamlit run app.py

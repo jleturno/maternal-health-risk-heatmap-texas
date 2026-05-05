@@ -6,141 +6,154 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+
+
+# =========================================================
+# PAGE CONFIG + FILE PATHS
+# =========================================================
 st.set_page_config(
     page_title="Texas Maternal Health Risk Dashboard",
+    page_icon="🏥",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
+BASE_DIR = Path(__file__).resolve().parent
+DATA_CSV = BASE_DIR / "data" / "tx_dashboard_data.csv"
+GEOJSON_FILE = BASE_DIR / "data" / "tx_counties.geojson"
+
+
+# =========================================================
+# CUSTOM STYLE
+# =========================================================
 st.markdown(
     """
     <style>
     .block-container {
-        padding-top: 4.25rem;
-        padding-bottom: 1.2rem;
-        max-width: 1600px;
+        padding-top: 2.35rem;
+        padding-bottom: 1.4rem;
+        max-width: 1500px;
     }
 
     h1, h2, h3 {
         letter-spacing: -0.02em;
     }
 
+    div[data-testid="stMetricValue"] {
+        font-size: 1.8rem;
+    }
+
     .hero-title {
-        font-size: 2.3rem;
+        font-size: 2.35rem;
         font-weight: 800;
-        line-height: 1.02;
-        margin-top: 0.4rem;
+        line-height: 1.05;
         margin-bottom: 0.35rem;
     }
 
     .hero-subtitle {
-        font-size: 1.02rem;
-        color: rgba(250,250,250,0.82);
-        margin-bottom: 0.8rem;
+        font-size: 1.03rem;
+        color: rgba(250,250,250,0.78);
+        margin-bottom: 0.85rem;
         max-width: 1080px;
+        line-height: 1.5;
     }
 
     .hero-takeaway {
         font-size: 0.98rem;
         line-height: 1.45;
         color: rgba(250,250,250,0.90);
-        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
-        border: 1px solid rgba(255,255,255,0.08);
+        background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.028));
+        border: 1px solid rgba(255,255,255,0.09);
         border-radius: 18px;
-        padding: 0.95rem 1rem;
+        padding: 0.9rem 1rem;
         margin-bottom: 1rem;
     }
 
-    .section-card {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 22px;
-        padding: 1.05rem 1.1rem;
-        box-shadow: 0 14px 34px rgba(0,0,0,0.10);
+    .pill {
+        display: inline-block;
+        padding: 0.32rem 0.74rem;
+        border-radius: 999px;
+        font-size: 0.79rem;
+        font-weight: 700;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.055);
+        margin-right: 0.35rem;
+        margin-bottom: 0.35rem;
     }
 
     .metric-card {
         background: rgba(255,255,255,0.035);
         border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 18px;
-        padding: 0.95rem 1rem;
+        border-radius: 17px;
+        padding: 0.9rem 0.95rem;
         height: 100%;
     }
 
     .metric-label {
-        font-size: 0.82rem;
-        color: rgba(250,250,250,0.70);
-        margin-bottom: 0.15rem;
+        font-size: 0.78rem;
+        color: rgba(250,250,250,0.68);
+        margin-bottom: 0.16rem;
     }
 
     .metric-value {
-        font-size: 1.72rem;
+        font-size: 1.58rem;
         font-weight: 780;
-        line-height: 1.02;
+        line-height: 1.05;
     }
 
     .metric-sub {
-        font-size: 0.82rem;
+        font-size: 0.80rem;
         color: rgba(250,250,250,0.66);
         margin-top: 0.32rem;
-        line-height: 1.45;
-    }
-
-    .pill {
-        display: inline-block;
-        padding: 0.32rem 0.75rem;
-        border-radius: 999px;
-        font-size: 0.79rem;
-        font-weight: 700;
-        border: 1px solid rgba(255,255,255,0.10);
-        background: rgba(255,255,255,0.045);
-        margin-right: 0.35rem;
-        margin-bottom: 0.35rem;
-    }
-
-    .section-title {
-        font-size: 1.08rem;
-        font-weight: 740;
-        margin-bottom: 0.4rem;
-    }
-
-    .small-note {
-        color: rgba(250,250,250,0.72);
-        font-size: 0.88rem;
-        margin-bottom: 0.45rem;
+        line-height: 1.42;
     }
 
     .callout-card {
-        background: rgba(255,255,255,0.028);
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 18px;
-        padding: 0.95rem 1rem;
+        background: rgba(255,255,255,0.032);
+        border: 1px solid rgba(255,255,255,0.075);
+        border-radius: 17px;
+        padding: 0.9rem 0.95rem;
         height: 100%;
     }
 
     .callout-title {
-        font-size: 0.80rem;
-        font-weight: 700;
-        color: rgba(250,250,250,0.70);
-        margin-bottom: 0.35rem;
+        font-size: 0.76rem;
+        font-weight: 750;
+        color: rgba(250,250,250,0.68);
+        margin-bottom: 0.32rem;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.035em;
     }
 
     .callout-text {
-        font-size: 0.97rem;
+        font-size: 0.95rem;
+        line-height: 1.45;
+    }
+
+    .small-note {
+        color: rgba(250,250,250,0.68);
+        font-size: 0.86rem;
+        margin-bottom: 0.55rem;
         line-height: 1.45;
     }
 
     .footer-note {
-        color: rgba(250,250,250,0.64);
+        color: rgba(250,250,250,0.62);
         font-size: 0.82rem;
         line-height: 1.45;
+    }
+
+    .section-caption {
+        color: rgba(250,250,250,0.72);
+        font-size: 0.9rem;
+        line-height: 1.45;
+        margin-bottom: 0.65rem;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
 
 # =========================================================
 # CONSTANTS
@@ -385,6 +398,11 @@ Interpretation
     return report
 
 
+def section_container():
+    """Create a Streamlit bordered container to avoid fragile open/close HTML wrappers."""
+    return st.container(border=True)
+
+
 # =========================================================
 # DATA LOAD
 # =========================================================
@@ -448,7 +466,8 @@ TOTAL_COUNTIES = int(df["NAME"].nunique())
 # =========================================================
 # SIDEBAR
 # =========================================================
-st.sidebar.header("Analysis Controls")
+st.sidebar.title("Texas Maternal Health")
+st.sidebar.caption("Explore county-level relative risk, rankings, and driver patterns.")
 
 selected_layer = st.sidebar.selectbox(
     "Map layer",
@@ -469,11 +488,18 @@ if not filtered_names:
 
 selected_county_name = st.sidebar.selectbox("County", filtered_names)
 
-show_education = st.sidebar.toggle("Show education panel", value=True)
-show_methodology = st.sidebar.toggle("Show methodology notes", value=True)
-show_similar = st.sidebar.toggle("Show similar counties", value=True)
-show_rankings = st.sidebar.toggle("Show rankings", value=True)
-show_report = st.sidebar.toggle("Show narrative report", value=True)
+st.sidebar.divider()
+st.sidebar.subheader("Display options")
+show_education = st.sidebar.toggle("Context panel", value=True)
+show_methodology = st.sidebar.toggle("Methodology", value=True)
+show_similar = st.sidebar.toggle("Similar counties", value=True)
+show_rankings = st.sidebar.toggle("Rankings", value=True)
+show_report = st.sidebar.toggle("Export summary", value=True)
+
+st.sidebar.divider()
+st.sidebar.caption(
+    "Percentile values are relative within Texas counties. Higher values indicate higher estimated burden or risk."
+)
 
 
 # =========================================================
@@ -483,68 +509,75 @@ st.markdown(
     """
     <div class="hero-title">Texas Maternal Health Risk Prioritization Dashboard</div>
     <div class="hero-subtitle">
-        County-level decision support tool for identifying maternal health risk burden, contextualizing key drivers, and communicating where elevated risk may warrant deeper review.
+        County-level decision support for identifying maternal health burden, contextualizing key drivers,
+        and communicating where elevated risk may warrant deeper public health review.
     </div>
     <div class="hero-takeaway">
-        <b>Key takeaway:</b> Counties with elevated composite maternal risk may warrant deeper review of prenatal access, economic vulnerability, mortality burden, and chronic disease-related risk factors.
+        <b>Key takeaway:</b> Counties with elevated composite maternal risk may warrant deeper review of prenatal access,
+        economic vulnerability, mortality burden, and chronic disease-related risk factors.
     </div>
     """,
     unsafe_allow_html=True,
 )
 
+st.info(
+    "This dashboard is designed for exploratory analysis and prioritization. "
+    "It highlights relative maternal health burden across Texas counties and is not intended as a causal model."
+)
+
 if show_education:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">Why this matters</div>', unsafe_allow_html=True)
+    with section_container():
+        st.subheader("Why this matters")
+        e1, e2, e3 = st.columns(3, gap="large")
 
-    e1, e2, e3 = st.columns(3, gap="large")
-
-    with e1:
-        st.markdown(
-            """
-            <div class="callout-card">
-                <div class="callout-title">Maternal health context</div>
-                <div class="callout-text">
-                Maternal health is shaped by access to care, chronic disease burden, social and economic conditions, and local system capacity. County-level variation can help identify where burden may be concentrated.
+        with e1:
+            st.markdown(
+                """
+                <div class="callout-card">
+                    <div class="callout-title">Maternal health context</div>
+                    <div class="callout-text">
+                    Maternal health is shaped by access to care, chronic disease burden, social and economic conditions,
+                    and local system capacity. County-level variation can help identify where burden may be concentrated.
+                    </div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                """,
+                unsafe_allow_html=True,
+            )
 
-    with e2:
-        st.markdown(
-            """
-            <div class="callout-card">
-                <div class="callout-title">How to read this dashboard</div>
-                <div class="callout-text">
-                Metrics are shown as percentile-style values. Higher percentiles indicate relatively higher burden or risk compared with other Texas counties. This is a prioritization lens, not a causal diagnosis.
+        with e2:
+            st.markdown(
+                """
+                <div class="callout-card">
+                    <div class="callout-title">How to read this dashboard</div>
+                    <div class="callout-text">
+                    Metrics are shown as percentile-style values. Higher percentiles indicate relatively higher burden
+                    or risk compared with other Texas counties. This is a prioritization lens, not a causal diagnosis.
+                    </div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                """,
+                unsafe_allow_html=True,
+            )
 
-    with e3:
-        st.markdown(
-            """
-            <div class="callout-card">
-                <div class="callout-title">Practical use</div>
-                <div class="callout-text">
-                The dashboard can support screening, stakeholder communication, county comparison, and targeted follow-up analysis by public health, health equity, nonprofit, or hospital strategy teams.
+        with e3:
+            st.markdown(
+                """
+                <div class="callout-card">
+                    <div class="callout-title">Practical use</div>
+                    <div class="callout-text">
+                    The dashboard can support screening, stakeholder communication, county comparison, and targeted
+                    follow-up analysis by public health, health equity, nonprofit, or hospital strategy teams.
+                    </div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    st.markdown("</div>", unsafe_allow_html=True)
+                """,
+                unsafe_allow_html=True,
+            )
 
 if show_methodology:
     with st.expander("Methodology, metric definitions, and limitations", expanded=False):
         st.markdown(
             """
             **Methodology**
-            - This dashboard uses county-level percentile-style measures to position counties within the statewide distribution.
+            - County-level indicators are represented as percentile-style measures within the Texas distribution.
             - Higher percentile values are interpreted as relatively higher burden or risk.
             - The composite score should be treated as a screening and prioritization tool rather than a causal model.
 
@@ -613,8 +646,8 @@ def make_map(dataframe, geojson_obj, layer_key, selected_geoid_value, feature_ma
     )
 
     fig.update_traces(
-        marker_line_width=0.75,
-        marker_line_color="rgba(255,255,255,0.22)",
+        marker_line_width=0.65,
+        marker_line_color="rgba(255,255,255,0.20)",
         customdata=np.stack([dataframe["NAME"]], axis=-1),
         hovertemplate=(
             "<b>%{customdata[0]} County</b><br>"
@@ -635,14 +668,14 @@ def make_map(dataframe, geojson_obj, layer_key, selected_geoid_value, feature_ma
                 colorscale=[[0, "rgba(0,0,0,0)"], [1, "rgba(0,0,0,0)"]],
                 showscale=False,
                 marker_opacity=1.0,
-                marker_line_width=3.2,
+                marker_line_width=3.0,
                 marker_line_color="white",
                 hoverinfo="skip",
             )
         )
 
     fig.update_layout(
-        height=760,
+        height=620,
         margin=dict(l=0, r=0, t=0, b=0),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -650,8 +683,8 @@ def make_map(dataframe, geojson_obj, layer_key, selected_geoid_value, feature_ma
         coloraxis_colorbar=dict(
             title=LABELS[layer_key],
             tickformat=".0f",
-            thickness=15,
-            len=0.78,
+            thickness=14,
+            len=0.74,
             x=0.97,
             y=0.50,
         ),
@@ -662,253 +695,247 @@ def make_map(dataframe, geojson_obj, layer_key, selected_geoid_value, feature_ma
 # =========================================================
 # MAIN LAYOUT
 # =========================================================
-left, right = st.columns([1.8, 1.0], gap="large")
+left, right = st.columns([1.65, 1.0], gap="large")
 
 with left:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown(
-        f'<div class="section-title">County Risk Map · {LABELS[selected_layer]}</div>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<div class="small-note">Selected county is outlined in white. Use the sidebar to change the county and metric layer.</div>',
-        unsafe_allow_html=True,
-    )
+    with section_container():
+        st.subheader(f"County Risk Map · {LABELS[selected_layer]}")
+        st.markdown(
+            '<div class="small-note">Selected county is outlined in white. Use the sidebar to change the county and metric layer.</div>',
+            unsafe_allow_html=True,
+        )
 
-    map_fig = make_map(df, geojson, selected_layer, selected_geoid, feature_lookup)
-    st.plotly_chart(
-        map_fig,
-        use_container_width=True,
-        config={"displayModeBar": False, "scrollZoom": False},
-    )
-
-    st.markdown("</div>", unsafe_allow_html=True)
+        map_fig = make_map(df, geojson, selected_layer, selected_geoid, feature_lookup)
+        st.plotly_chart(
+            map_fig,
+            use_container_width=True,
+            config={"displayModeBar": False, "scrollZoom": False},
+        )
 
 with right:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown(
-        f'<div class="section-title">County Profile · {row["NAME"]} County</div>',
-        unsafe_allow_html=True,
-    )
+    with section_container():
+        st.subheader(f"County Profile · {row['NAME']} County")
 
-    st.markdown(
-        f"""
-        <div>
-            <span class="pill">Risk Tier: {risk_tier(overall_risk)}</span>
-            <span class="pill">GEOID: {row["GEOID"]}</span>
-            <span class="pill">{percentile_band_text(overall_risk)}</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    m1, m2, m3 = st.columns(3)
-
-    with m1:
         st.markdown(
             f"""
-            <div class="metric-card">
-                <div class="metric-label">Composite Risk Percentile</div>
-                <div class="metric-value">{fmt_num(overall_risk)}</div>
-                <div class="metric-sub">{tier_description(overall_risk)}</div>
+            <div>
+                <span class="pill">Risk Tier: {risk_tier(overall_risk)}</span>
+                <span class="pill">GEOID: {row["GEOID"]}</span>
+                <span class="pill">{percentile_band_text(overall_risk)}</span>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-    with m2:
-        rank_text = f"{fmt_int(overall_rank)}{rank_suffix(overall_rank)} of {TOTAL_COUNTIES}" if not pd.isna(overall_rank) else "—"
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-label">Statewide Risk Rank</div>
-                <div class="metric-value">{rank_text}</div>
-                <div class="metric-sub">Higher rank indicates higher relative burden</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        m1, m2, m3 = st.columns(3)
 
-    with m3:
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-label">Selected Layer vs Texas</div>
-                <div class="metric-value">{fmt_num(selected_metric_val)}</div>
-                <div class="metric-sub">{delta_text(selected_delta)}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    st.markdown("<div style='height:0.8rem;'></div>", unsafe_allow_html=True)
-
-    c1, c2, c3 = st.columns(3)
-
-    with c1:
-        st.markdown(
-            f"""
-            <div class="callout-card">
-                <div class="callout-title">Burden level</div>
-                <div class="callout-text">
-                {row["NAME"]} County's composite maternal risk falls in the <b>{percentile_band_text(overall_risk)}</b>.
+        with m1:
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-label">Composite Risk</div>
+                    <div class="metric-value">{fmt_num(overall_risk)}</div>
+                    <div class="metric-sub">{tier_description(overall_risk)}</div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                """,
+                unsafe_allow_html=True,
+            )
 
-    with c2:
-        top_driver_name = drivers_df.iloc[0]["Metric"] if len(drivers_df) else "Unavailable"
-        st.markdown(
-            f"""
-            <div class="callout-card">
-                <div class="callout-title">Main pressure point</div>
-                <div class="callout-text">
-                The largest deviation from the Texas average is in <b>{top_driver_name}</b>.
+        with m2:
+            rank_text = f"{fmt_int(overall_rank)}{rank_suffix(overall_rank)} of {TOTAL_COUNTIES}" if not pd.isna(overall_rank) else "—"
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-label">Statewide Rank</div>
+                    <div class="metric-value">{rank_text}</div>
+                    <div class="metric-sub">Higher rank indicates higher relative burden.</div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                """,
+                unsafe_allow_html=True,
+            )
 
-    with c3:
-        st.markdown(
-            """
-            <div class="callout-card">
-                <div class="callout-title">Planning implication</div>
-                <div class="callout-text">
-                Counties with elevated percentile burden may warrant deeper review, local validation, and targeted maternal health planning.
+        with m3:
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-label">Selected Layer</div>
+                    <div class="metric-value">{fmt_num(selected_metric_val)}</div>
+                    <div class="metric-sub">{delta_text(selected_delta)}</div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.divider()
+
+        c1, c2, c3 = st.columns(3)
+
+        with c1:
+            st.markdown(
+                f"""
+                <div class="callout-card">
+                    <div class="callout-title">Burden level</div>
+                    <div class="callout-text">
+                    {row["NAME"]} County's composite maternal risk falls in the <b>{percentile_band_text(overall_risk)}</b>.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with c2:
+            top_driver_name = drivers_df.iloc[0]["Metric"] if len(drivers_df) else "Unavailable"
+            st.markdown(
+                f"""
+                <div class="callout-card">
+                    <div class="callout-title">Main pressure point</div>
+                    <div class="callout-text">
+                    The largest deviation from the Texas average is in <b>{top_driver_name}</b>.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with c3:
+            st.markdown(
+                """
+                <div class="callout-card">
+                    <div class="callout-title">Planning implication</div>
+                    <div class="callout-text">
+                    Elevated percentile burden may warrant local validation and targeted maternal health planning.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.divider()
+
+        st.markdown("**Selected metric**")
+        st.write(
+            f"{LABELS[selected_layer]}  \n"
+            f"County percentile: **{fmt_num(selected_metric_val)}**  \n"
+            f"Texas average: **{fmt_num(selected_tx_avg)}**  \n"
+            f"Difference: **{fmt_num(selected_delta)}**"
         )
 
-    st.markdown("<div style='height:0.8rem;'></div>", unsafe_allow_html=True)
-
-    st.markdown("**Selected metric**")
-    st.write(
-        f"{LABELS[selected_layer]}  \n"
-        f"County percentile: **{fmt_num(selected_metric_val)}**  \n"
-        f"Texas average: **{fmt_num(selected_tx_avg)}**  \n"
-        f"Difference: **{fmt_num(selected_delta)}**"
-    )
-
-    st.markdown("**Top differences relative to Texas average**")
-    drivers_display = drivers_df[["Metric", "County", "Texas Avg", "Delta"]].copy()
-    drivers_display["County"] = drivers_display["County"].map(lambda x: fmt_num(x))
-    drivers_display["Texas Avg"] = drivers_display["Texas Avg"].map(lambda x: fmt_num(x))
-    drivers_display["Delta"] = drivers_display["Delta"].map(lambda x: fmt_num(x))
-    st.dataframe(drivers_display.head(5), use_container_width=True, hide_index=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("**Top differences relative to Texas average**")
+        drivers_display = drivers_df[["Metric", "County", "Texas Avg", "Delta"]].copy()
+        drivers_display["County"] = drivers_display["County"].map(lambda x: fmt_num(x))
+        drivers_display["Texas Avg"] = drivers_display["Texas Avg"].map(lambda x: fmt_num(x))
+        drivers_display["Delta"] = drivers_display["Delta"].map(lambda x: fmt_num(x))
+        st.dataframe(drivers_display.head(5), use_container_width=True, hide_index=True)
 
 
 # =========================================================
 # PROFILE CHART + INTERPRETATION
 # =========================================================
-st.markdown("<div style='height:1rem;'></div>", unsafe_allow_html=True)
+st.write("")
 chart_left, chart_right = st.columns([1, 1], gap="large")
 
 with chart_left:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">Component profile · County vs Texas</div>', unsafe_allow_html=True)
+    with section_container():
+        st.subheader("Component Profile · County vs Texas")
+        st.markdown(
+            '<div class="section-caption">Compares the selected county against statewide averages across available percentile indicators.</div>',
+            unsafe_allow_html=True,
+        )
 
-    chart_df_long = profile_df.melt(
-        id_vars="Metric",
-        value_vars=["County", "Texas Avg"],
-        var_name="Series",
-        value_name="Percentile",
-    )
+        chart_df_long = profile_df.melt(
+            id_vars="Metric",
+            value_vars=["County", "Texas Avg"],
+            var_name="Series",
+            value_name="Percentile",
+        )
 
-    fig_profile = px.bar(
-        chart_df_long,
-        x="Metric",
-        y="Percentile",
-        color="Series",
-        barmode="group",
-        hover_data={"Percentile": ":.1f"},
-    )
+        fig_profile = px.bar(
+            chart_df_long,
+            x="Metric",
+            y="Percentile",
+            color="Series",
+            barmode="group",
+            hover_data={"Percentile": ":.1f"},
+        )
 
-    fig_profile.update_layout(
-        height=410,
-        margin=dict(l=10, r=10, t=10, b=10),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        xaxis_title="",
-        yaxis_title="Percentile",
-        legend_title="",
-    )
+        fig_profile.update_layout(
+            height=390,
+            margin=dict(l=10, r=10, t=8, b=10),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            xaxis_title="",
+            yaxis_title="Percentile",
+            legend_title="",
+        )
 
-    st.plotly_chart(fig_profile, use_container_width=True, config={"displayModeBar": False})
-    st.markdown("</div>", unsafe_allow_html=True)
+        fig_profile.update_xaxes(tickangle=-20)
+        st.plotly_chart(fig_profile, use_container_width=True, config={"displayModeBar": False})
 
 with chart_right:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">Analyst interpretation</div>', unsafe_allow_html=True)
+    with section_container():
+        st.subheader("Analyst Interpretation")
 
-    top3 = drivers_df.head(3).copy()
-    bullet_lines = []
-    for _, r in top3.iterrows():
-        direction = "higher than" if r["Delta"] > 0 else "lower than"
-        bullet_lines.append(f"- **{r['Metric']}** is {fmt_num(abs(r['Delta']))} points {direction} the Texas average.")
+        top3 = drivers_df.head(3).copy()
 
-    bullet_text = "\n".join(bullet_lines) if bullet_lines else "Driver comparison unavailable."
+        st.markdown("**Summary**")
+        st.write(
+            f"{row['NAME']} County has a composite maternal risk percentile of "
+            f"**{fmt_num(overall_risk)}** and ranks **{fmt_int(overall_rank)} of {TOTAL_COUNTIES}** "
+            "statewide on the composite view."
+        )
 
-    st.markdown(
-        f"""
-        **Summary**
+        st.write(
+            f"For the selected metric, **{LABELS[selected_layer]}**, the county is at "
+            f"**{fmt_num(selected_metric_val)}** compared with a Texas average of "
+            f"**{fmt_num(selected_tx_avg)}**."
+        )
 
-        {row["NAME"]} County has a composite maternal risk percentile of **{fmt_num(overall_risk)}**
-        and ranks **{fmt_int(overall_rank)} of {TOTAL_COUNTIES}** statewide on the composite view.
+        st.markdown("**Largest deviations from statewide average**")
+        if len(top3) == 0:
+            st.write("Driver comparison unavailable.")
+        else:
+            for _, r in top3.iterrows():
+                direction = "higher than" if r["Delta"] > 0 else "lower than"
+                st.write(
+                    f"- **{r['Metric']}**: {fmt_num(abs(r['Delta']))} points {direction} the Texas average."
+                )
 
-        For the currently selected layer, the county is **{fmt_num(selected_metric_val)}**
-        versus a Texas average of **{fmt_num(selected_tx_avg)}**.
-
-        **Largest deviations from the statewide average**
-
-        {bullet_text}
-
-        **Interpretive note**
-
-        Elevated percentile burden should be read as a signal for prioritization and deeper investigation, not proof of causation.
-        """
-    )
-
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("**Interpretive note**")
+        st.write(
+            "Elevated percentile burden should be read as a signal for prioritization and deeper investigation, "
+            "not proof of causation. Findings should be interpreted alongside local context, data source timing, "
+            "and subject-matter expertise."
+        )
 
 
 # =========================================================
 # SIMILAR COUNTIES
 # =========================================================
 if show_similar:
-    st.markdown("<div style='height:1rem;'></div>", unsafe_allow_html=True)
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">Most similar counties</div>', unsafe_allow_html=True)
-    st.markdown(
-        '<div class="small-note">Similarity is based on the available percentile metrics in this dashboard. Lower distance indicates a more similar county profile.</div>',
-        unsafe_allow_html=True,
-    )
+    st.write("")
+    with section_container():
+        st.subheader("Most Similar Counties")
+        st.markdown(
+            '<div class="section-caption">Similarity is based on available percentile metrics. Lower distance indicates a more similar county profile.</div>',
+            unsafe_allow_html=True,
+        )
 
-    similar_df = find_similar_counties(df, available_layers, selected_geoid, top_n=5)
+        similar_df = find_similar_counties(df, available_layers, selected_geoid, top_n=5)
 
-    if len(similar_df) == 0:
-        st.info("Similar county comparison unavailable.")
-    else:
-        similar_show = similar_df.copy()
-        if "Distance" in similar_show.columns:
-            similar_show["Distance"] = similar_show["Distance"].map(lambda x: f"{x:.2f}")
-        st.dataframe(similar_show, use_container_width=True, hide_index=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
+        if len(similar_df) == 0:
+            st.info("Similar county comparison unavailable.")
+        else:
+            similar_show = similar_df.copy()
+            if "Distance" in similar_show.columns:
+                similar_show["Distance"] = similar_show["Distance"].map(lambda x: f"{x:.2f}")
+            st.dataframe(similar_show, use_container_width=True, hide_index=True)
 
 
 # =========================================================
 # RANKINGS
 # =========================================================
 if show_rankings:
-    st.markdown("<div style='height:1rem;'></div>", unsafe_allow_html=True)
+    st.write("")
 
     ranked = (
         df[["NAME", "GEOID", selected_layer]]
@@ -929,75 +956,70 @@ if show_rankings:
     left_rank, right_rank = st.columns(2, gap="large")
 
     with left_rank:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown(
-            f'<div class="section-title">Highest-burden counties · {LABELS[selected_layer]}</div>',
-            unsafe_allow_html=True,
-        )
-        st.dataframe(
-            ranked[["Rank", "NAME", "GEOID", "Percentile"]].head(10),
-            use_container_width=True,
-            hide_index=True,
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+        with section_container():
+            st.subheader(f"Highest-Burden Counties · {LABELS[selected_layer]}")
+            st.dataframe(
+                ranked[["Rank", "NAME", "GEOID", "Percentile"]].head(10),
+                use_container_width=True,
+                hide_index=True,
+            )
 
     with right_rank:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown(
-            f'<div class="section-title">Lowest-burden counties · {LABELS[selected_layer]}</div>',
-            unsafe_allow_html=True,
-        )
-        st.dataframe(
-            ranked[["Rank", "NAME", "GEOID", "Percentile"]].tail(10).sort_values("Rank", ascending=False),
-            use_container_width=True,
-            hide_index=True,
-        )
-        st.markdown(f"**Selected county rank in this layer:** {selected_rank_text}")
-        st.markdown("</div>", unsafe_allow_html=True)
+        with section_container():
+            st.subheader(f"Lowest-Burden Counties · {LABELS[selected_layer]}")
+            st.dataframe(
+                ranked[["Rank", "NAME", "GEOID", "Percentile"]].tail(10).sort_values("Rank", ascending=False),
+                use_container_width=True,
+                hide_index=True,
+            )
+            st.markdown(f"**Selected county rank in this layer:** {selected_rank_text}")
 
 
 # =========================================================
 # EXPORTS
 # =========================================================
 if show_report:
-    st.markdown("<div style='height:1rem;'></div>", unsafe_allow_html=True)
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">Narrative summary and exports</div>', unsafe_allow_html=True)
-
-    report_text = make_county_summary(row, selected_layer, drivers_df, df, LABELS, TX_AVG, TOTAL_COUNTIES)
-    st.text_area("County summary", value=report_text, height=260, label_visibility="collapsed")
-
-    export_col1, export_col2 = st.columns(2)
-
-    with export_col1:
-        st.download_button(
-            "Download county summary (.txt)",
-            data=report_text.encode("utf-8"),
-            file_name=f"{row['NAME'].replace(' ', '_')}_maternal_health_summary.txt",
-            mime="text/plain",
+    st.write("")
+    with section_container():
+        st.subheader("Narrative Summary and Exports")
+        st.markdown(
+            '<div class="section-caption">Generate a county-level summary for policy communication, stakeholder review, or follow-up analysis.</div>',
+            unsafe_allow_html=True,
         )
 
-    with export_col2:
-        export_df = drivers_df[["Metric", "County", "Texas Avg", "Delta"]].copy()
-        st.download_button(
-            "Download driver comparison (.csv)",
-            data=export_df.to_csv(index=False).encode("utf-8"),
-            file_name=f"{row['NAME'].replace(' ', '_')}_driver_comparison.csv",
-            mime="text/csv",
-        )
+        report_text = make_county_summary(row, selected_layer, drivers_df, df, LABELS, TX_AVG, TOTAL_COUNTIES)
+        st.text_area("County summary", value=report_text, height=245, label_visibility="collapsed")
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        export_col1, export_col2 = st.columns(2)
+
+        with export_col1:
+            st.download_button(
+                "Download county summary (.txt)",
+                data=report_text.encode("utf-8"),
+                file_name=f"{row['NAME'].replace(' ', '_')}_maternal_health_summary.txt",
+                mime="text/plain",
+            )
+
+        with export_col2:
+            export_df = drivers_df[["Metric", "County", "Texas Avg", "Delta"]].copy()
+            st.download_button(
+                "Download driver comparison (.csv)",
+                data=export_df.to_csv(index=False).encode("utf-8"),
+                file_name=f"{row['NAME'].replace(' ', '_')}_driver_comparison.csv",
+                mime="text/csv",
+            )
 
 
 # =========================================================
 # FOOTER
 # =========================================================
-st.markdown("<div style='height:0.7rem;'></div>", unsafe_allow_html=True)
+st.write("")
 st.markdown(
     """
     <div class="footer-note">
     Designed as a county-level maternal health prioritization and communication tool for Texas.
-    Percentile-style values indicate relative statewide position and should be interpreted with source context, timing, and local expertise.
+    Percentile-style values indicate relative statewide position and should be interpreted with source context,
+    timing, and local expertise.
     </div>
     """,
     unsafe_allow_html=True,
