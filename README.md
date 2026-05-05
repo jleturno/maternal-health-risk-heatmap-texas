@@ -1,5 +1,13 @@
 # Texas Maternal Health Risk Prioritization Dashboard
 
+## Dashboard Preview
+
+### Risk Map and County Analysis
+![Risk Map](dashboard_map.png)
+
+### Dashboard Overview and Methodology
+![Overview](dashboard_overview.png)
+
 A county-level maternal health analytics application designed to support evidence-based decision-making, risk identification, and equitable resource allocation across Texas.
 
 ---
