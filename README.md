@@ -8,23 +8,21 @@
 ### Dashboard Overview and Methodology
 ![Overview](dashboard_overview.png)
 
-A county-level maternal health analytics application designed to support evidence-based decision-making, risk identification, and equitable resource allocation across Texas.
+## Live App
+
+[View the interactive dashboard](https://maternal-health-risk-heatmap-texas-sag9z8vmjjiu5cktgl6eew.streamlit.app/)
 
 ---
 
 ## Overview
 
-Maternal health outcomes in the United States—and particularly in Texas—vary significantly across geography, access to care, and socioeconomic conditions. These disparities are often difficult to interpret quickly using raw data alone.
+A county-level maternal health analytics application designed to support evidence-based decision-making, risk prioritization, and equitable resource allocation across Texas.
+
+Maternal health outcomes in the United States — and particularly in Texas — vary significantly across geography, access to care, and socioeconomic conditions. These disparities are often difficult to interpret quickly using raw data alone.
 
 This project translates complex maternal health indicators into a structured, interpretable framework that highlights where risk is most concentrated and which factors may be contributing to that burden.
 
-The dashboard enables users to:
-- Identify counties with elevated relative maternal health risk
-- Compare counties against statewide benchmarks
-- Surface key drivers of disparities across regions
-- Support more targeted and informed public health responses
-
-This tool is intended as a **prioritization and communication aid**, not a causal model.
+This tool is designed as a decision-support system for public health stakeholders, enabling identification of high-risk counties and key contributing factors to maternal health disparities.
 
 ---
 
@@ -33,41 +31,42 @@ This tool is intended as a **prioritization and communication aid**, not a causa
 Maternal health disparities are not randomly distributed. They reflect underlying differences in access to care, economic stability, chronic disease burden, and systemic inequities.
 
 Without clear, accessible tools for interpreting these patterns:
-- High-risk areas may go under-identified
-- Resources may not be allocated effectively
-- Critical intervention opportunities may be missed
 
-This dashboard is designed to make those patterns more visible, interpretable, and actionable.
+- High-risk areas may go under-identified  
+- Resources may not be allocated effectively  
+- Critical intervention opportunities may be missed  
+
+This dashboard is designed to make these patterns more visible, interpretable, and actionable.
 
 ---
 
 ## Key Features
 
-- Interactive choropleth map of Texas counties
-- Composite maternal health risk score (percentile-based)
-- County-level risk profile with statewide ranking and context
-- Driver analysis comparing county values to Texas averages
-- Component comparison visualization across key metrics
-- Similarity analysis to identify comparable county profiles
-- Ranking tables for highest- and lowest-burden counties
-- Automated narrative summaries for communication and reporting
-- Methodology and interpretation guidance
+- Interactive choropleth map of Texas counties  
+- Composite maternal health risk score (percentile-based)  
+- County-level risk profile with statewide ranking and context  
+- Driver analysis comparing county values to Texas averages  
+- Component comparison visualization across key metrics  
+- Similarity analysis to identify comparable county profiles  
+- Rankings for highest- and lowest-burden counties  
+- Automated narrative summaries for communication and reporting  
+- Methodology and interpretation guidance  
 
 ---
 
 ## Methodology
 
-- All indicators are standardized into percentile-based values
-- Higher percentiles represent relatively higher burden or risk
-- A composite risk score aggregates multiple maternal health-related factors
-- Rankings are calculated across all Texas counties
+- All indicators are standardized into percentile-based values  
+- Higher percentiles represent relatively higher burden or risk  
+- A composite risk score aggregates multiple maternal health-related factors  
+- Rankings are calculated across all Texas counties  
 
 ### Interpretation Notes
 
-- This is a relative comparison framework, not an absolute risk model
-- Results should not be interpreted as causal
-- County-level data may mask within-county disparities
-- Findings should be used alongside domain expertise and local context
+- This is a relative comparison framework, not an absolute risk model  
+- Results should not be interpreted as causal  
+- County-level data may mask within-county disparities  
+- Findings should be used alongside domain expertise and local context  
 
 ---
 
@@ -75,11 +74,11 @@ This dashboard is designed to make those patterns more visible, interpretable, a
 
 This tool is designed to support:
 
-- Public health agencies identifying high-priority regions
-- Policy analysts evaluating geographic disparities
-- Health equity organizations targeting interventions
-- Hospital systems and planners assessing regional need
-- Nonprofits communicating risk patterns to stakeholders
+- Public health agencies identifying high-priority regions  
+- Policy analysts evaluating geographic disparities  
+- Health equity organizations targeting interventions  
+- Hospital systems and planners assessing regional need  
+- Nonprofits communicating risk patterns to stakeholders  
 
 ---
 
