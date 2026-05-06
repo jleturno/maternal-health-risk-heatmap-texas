@@ -2,11 +2,13 @@
 
 ## Dashboard Preview
 
+## Dashboard Preview
+
 ### Risk Map and County Analysis
-![Risk Map](notebooks/dashboard_map.png)
+![Risk Map](dashboard_map.png)
 
 ### Dashboard Overview and Methodology
-![Overview](notebooks/dashboard_overview.png)
+![Overview](dashboard_overview.png)
 
 ## Live App
 
